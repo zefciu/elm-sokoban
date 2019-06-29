@@ -124,10 +124,31 @@ isFree model ( x, y ) =
         |> List.all isNonBlockingObject
 
 
-canMove : Model -> Keyboard.Arrows.Arrows -> Bool
-canMove model arrows =
-    addArrows model.playerPos arrows
+isCrate : Model -> ( Int, Int ) -> Bool
+isCrate model ( x, y ) =
+    getField ( x, y ) model
+        |> List.any ((==) Crate)
+
+
+canPush : Keyboard.Arrows.Arrows -> Model -> Bool
+canPush arrows model =
+    let
+        pushFrom =
+            addArrows model.playerPos arrows
+
+        pushTo =
+            addArrows pushFrom arrows
+    in
+    isCrate model pushFrom
+        && isFree model pushTo
+
+
+canMove : Keyboard.Arrows.Arrows -> Model -> Bool
+canMove arrows model =
+    (addArrows model.playerPos arrows
         |> isFree model
+    )
+        || canPush arrows model
 
 
 addArrows : ( Int, Int ) -> Keyboard.Arrows.Arrows -> ( Int, Int )
@@ -168,9 +189,22 @@ move model arrows =
     let
         destination =
             addArrows model.playerPos arrows
+
+        crate =
+            isCrate model destination
+
+        pushTo =
+            addArrows destination arrows
     in
     { model
-        | board = moveObject model.playerPos destination Player model.board
+        | board =
+            (if crate then
+                moveObject destination pushTo Crate model.board
+
+             else
+                model.board
+            )
+                |> moveObject model.playerPos destination Player
         , playerPos = destination
     }
 
@@ -181,7 +215,7 @@ processMove model =
         arrows =
             Keyboard.Arrows.arrows model.pressedKeys
     in
-    if canMove model arrows then
+    if canMove arrows model then
         ( move model arrows, Cmd.none )
 
     else
