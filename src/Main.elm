@@ -4,6 +4,7 @@ import Array
 import Browser
 import Grid
 import Html
+import Html.Attributes
 import Keyboard
 import Keyboard.Arrows
 import List exposing (range)
@@ -48,30 +49,34 @@ type Msg
 
 viewField : Field -> Html.Html msg
 viewField field =
-    Html.td []
-        [ Html.text <|
+    Html.td
+        [ Html.Attributes.class <|
             case field of
                 [ Player ] ->
-                    "p"
+                    "player"
 
                 [ Crate ] ->
-                    "c"
+                    "crate"
 
                 [ Wall ] ->
-                    "w"
+                    "wall"
 
                 [ Target ] ->
-                    "t"
+                    "target"
 
                 [ Crate, Target ] ->
-                    "C"
+                    "crate-target"
+
+                [ Player, Target ] ->
+                    "player"
 
                 [] ->
-                    "."
+                    "floor"
 
                 _ ->
-                    "!"
+                    "unknown"
         ]
+        []
 
 
 viewRow : Array.Array Field -> Html.Html msg
