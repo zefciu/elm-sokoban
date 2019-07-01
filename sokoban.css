@@ -1,7 +1,15 @@
+tr {
+    display: block;
+}
 td {
     width: 30px;
     height: 30px;
     background-image: url('skin.png');
+    padding: 0;
+    border-collapse: collapse;
+    margin: 0;
+    border-spacing: 0;
+    display: inline-block;
 }
 
 .target {
