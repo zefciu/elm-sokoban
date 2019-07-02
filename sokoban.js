@@ -4892,10 +4892,10 @@ var LesleyLai$elm_grid$Grid$repeat = F3(
 		return LesleyLai$elm_grid$Grid$Grid(
 			{data: data, h: h, w: w});
 	});
-var author$project$Main$Crate = {$: 'Crate'};
-var author$project$Main$Player = {$: 'Player'};
-var author$project$Main$Target = {$: 'Target'};
-var author$project$Main$Wall = {$: 'Wall'};
+var author$project$Board$Crate = {$: 'Crate'};
+var author$project$Board$Player = {$: 'Player'};
+var author$project$Board$Target = {$: 'Target'};
+var author$project$Board$Wall = {$: 'Wall'};
 var elm$core$Maybe$withDefault = F2(
 	function (_default, maybe) {
 		if (maybe.$ === 'Just') {
@@ -5128,32 +5128,34 @@ var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$init = function (_n0) {
 	return _Utils_Tuple2(
 		{
-			board: A2(
-				elm$core$Maybe$withDefault,
-				A3(LesleyLai$elm_grid$Grid$repeat, 0, 0, _List_Nil),
-				LesleyLai$elm_grid$Grid$fromList(
-					_List_fromArray(
-						[
-							_List_fromArray(
+			board: {
+				grid: A2(
+					elm$core$Maybe$withDefault,
+					A3(LesleyLai$elm_grid$Grid$repeat, 0, 0, _List_Nil),
+					LesleyLai$elm_grid$Grid$fromList(
+						_List_fromArray(
 							[
 								_List_fromArray(
-								[author$project$Main$Wall]),
-								_List_Nil,
-								_List_Nil
-							]),
-							_List_fromArray(
-							[
+								[
+									_List_fromArray(
+									[author$project$Board$Wall]),
+									_List_Nil,
+									_List_Nil
+								]),
 								_List_fromArray(
-								[author$project$Main$Player]),
+								[
+									_List_fromArray(
+									[author$project$Board$Player]),
+									_List_fromArray(
+									[author$project$Board$Crate]),
+									_List_fromArray(
+									[author$project$Board$Target])
+								]),
 								_List_fromArray(
-								[author$project$Main$Crate]),
-								_List_fromArray(
-								[author$project$Main$Target])
-							]),
-							_List_fromArray(
-							[_List_Nil, _List_Nil, _List_Nil])
-						]))),
-			playerPos: _Utils_Tuple2(0, 1),
+								[_List_Nil, _List_Nil, _List_Nil])
+							]))),
+				playerPos: _Utils_Tuple2(0, 1)
+			},
 			pressedKeys: _List_Nil
 		},
 		elm$core$Platform$Cmd$none);
@@ -6359,7 +6361,7 @@ var author$project$Main$processKey = F2(
 				pressedKeys: A2(ohanhi$keyboard$Keyboard$update, keyMsg, model.pressedKeys)
 			});
 	});
-var author$project$Main$addArrows = F2(
+var author$project$Board$addArrows = F2(
 	function (_n0, arrows) {
 		var x = _n0.a;
 		var y = _n0.b;
@@ -6414,18 +6416,18 @@ var LesleyLai$elm_grid$Grid$get = F2(
 		var data = grid.a.data;
 		return A4(LesleyLai$elm_grid$Grid$inRange, x, y, w, h) ? A2(elm$core$Array$get, x + (y * h), data) : elm$core$Maybe$Nothing;
 	});
-var author$project$Main$getField = F2(
-	function (_n0, model) {
+var author$project$Board$getField = F2(
+	function (_n0, board) {
 		var x = _n0.a;
 		var y = _n0.b;
 		return A2(
 			elm$core$Maybe$withDefault,
 			_List_fromArray(
-				[author$project$Main$Wall]),
+				[author$project$Board$Wall]),
 			A2(
 				LesleyLai$elm_grid$Grid$get,
 				_Utils_Tuple2(x, y),
-				model.board));
+				board.grid));
 	});
 var elm$core$List$any = F2(
 	function (isOkay, list) {
@@ -6448,19 +6450,19 @@ var elm$core$List$any = F2(
 			}
 		}
 	});
-var author$project$Main$isCrate = F2(
-	function (model, _n0) {
+var author$project$Board$isCrate = F2(
+	function (board, _n0) {
 		var x = _n0.a;
 		var y = _n0.b;
 		return A2(
 			elm$core$List$any,
-			elm$core$Basics$eq(author$project$Main$Crate),
+			elm$core$Basics$eq(author$project$Board$Crate),
 			A2(
-				author$project$Main$getField,
+				author$project$Board$getField,
 				_Utils_Tuple2(x, y),
-				model));
+				board));
 	});
-var author$project$Main$isNonBlockingObject = function (o) {
+var author$project$Board$isNonBlockingObject = function (o) {
 	if (o.$ === 'Target') {
 		return true;
 	} else {
@@ -6480,30 +6482,30 @@ var elm$core$List$all = F2(
 			A2(elm$core$Basics$composeL, elm$core$Basics$not, isOkay),
 			list);
 	});
-var author$project$Main$isFree = F2(
-	function (model, _n0) {
+var author$project$Board$isFree = F2(
+	function (board, _n0) {
 		var x = _n0.a;
 		var y = _n0.b;
 		return A2(
 			elm$core$List$all,
-			author$project$Main$isNonBlockingObject,
+			author$project$Board$isNonBlockingObject,
 			A2(
-				author$project$Main$getField,
+				author$project$Board$getField,
 				_Utils_Tuple2(x, y),
-				model));
+				board));
 	});
-var author$project$Main$canPush = F2(
-	function (arrows, model) {
-		var pushFrom = A2(author$project$Main$addArrows, model.playerPos, arrows);
-		var pushTo = A2(author$project$Main$addArrows, pushFrom, arrows);
-		return A2(author$project$Main$isCrate, model, pushFrom) && A2(author$project$Main$isFree, model, pushTo);
+var author$project$Board$canPush = F2(
+	function (arrows, board) {
+		var pushFrom = A2(author$project$Board$addArrows, board.playerPos, arrows);
+		var pushTo = A2(author$project$Board$addArrows, pushFrom, arrows);
+		return A2(author$project$Board$isCrate, board, pushFrom) && A2(author$project$Board$isFree, board, pushTo);
 	});
-var author$project$Main$canMove = F2(
-	function (arrows, model) {
+var author$project$Board$canMove = F2(
+	function (arrows, board) {
 		return A2(
-			author$project$Main$isFree,
-			model,
-			A2(author$project$Main$addArrows, model.playerPos, arrows)) || A2(author$project$Main$canPush, arrows, model);
+			author$project$Board$isFree,
+			board,
+			A2(author$project$Board$addArrows, board.playerPos, arrows)) || A2(author$project$Board$canPush, arrows, board);
 	});
 var elm$core$Array$setHelp = F4(
 	function (shift, index, value, tree) {
@@ -6571,8 +6573,8 @@ var elm$core$Maybe$map = F2(
 			return elm$core$Maybe$Nothing;
 		}
 	});
-var author$project$Main$putObject = F3(
-	function (_n0, o, board) {
+var author$project$Board$putObject = F3(
+	function (_n0, o, grid) {
 		var x = _n0.a;
 		var y = _n0.b;
 		var value = A2(
@@ -6584,15 +6586,15 @@ var author$project$Main$putObject = F3(
 				A2(
 					LesleyLai$elm_grid$Grid$get,
 					_Utils_Tuple2(x, y),
-					board)));
+					grid)));
 		return A3(
 			LesleyLai$elm_grid$Grid$set,
 			_Utils_Tuple2(x, y),
 			value,
-			board);
+			grid);
 	});
-var author$project$Main$removeObject = F3(
-	function (_n0, o, board) {
+var author$project$Board$removeObject = F3(
+	function (_n0, o, grid) {
 		var x = _n0.a;
 		var y = _n0.b;
 		var value = A2(
@@ -6605,43 +6607,43 @@ var author$project$Main$removeObject = F3(
 				A2(
 					LesleyLai$elm_grid$Grid$get,
 					_Utils_Tuple2(x, y),
-					board)));
+					grid)));
 		return A3(
 			LesleyLai$elm_grid$Grid$set,
 			_Utils_Tuple2(x, y),
 			value,
-			board);
+			grid);
 	});
-var author$project$Main$moveObject = F4(
-	function (_n0, _n1, o, board) {
+var author$project$Board$moveObject = F4(
+	function (_n0, _n1, o, grid) {
 		var x1 = _n0.a;
 		var y1 = _n0.b;
 		var x2 = _n1.a;
 		var y2 = _n1.b;
 		return A3(
-			author$project$Main$putObject,
+			author$project$Board$putObject,
 			_Utils_Tuple2(x2, y2),
 			o,
 			A3(
-				author$project$Main$removeObject,
+				author$project$Board$removeObject,
 				_Utils_Tuple2(x1, y1),
 				o,
-				board));
+				grid));
 	});
-var author$project$Main$move = F2(
-	function (model, arrows) {
-		var destination = A2(author$project$Main$addArrows, model.playerPos, arrows);
-		var pushTo = A2(author$project$Main$addArrows, destination, arrows);
-		var crate = A2(author$project$Main$isCrate, model, destination);
+var author$project$Board$move = F2(
+	function (board, arrows) {
+		var destination = A2(author$project$Board$addArrows, board.playerPos, arrows);
+		var pushTo = A2(author$project$Board$addArrows, destination, arrows);
+		var crate = A2(author$project$Board$isCrate, board, destination);
 		return _Utils_update(
-			model,
+			board,
 			{
-				board: A4(
-					author$project$Main$moveObject,
-					model.playerPos,
+				grid: A4(
+					author$project$Board$moveObject,
+					board.playerPos,
 					destination,
-					author$project$Main$Player,
-					crate ? A4(author$project$Main$moveObject, destination, pushTo, author$project$Main$Crate, model.board) : model.board),
+					author$project$Board$Player,
+					crate ? A4(author$project$Board$moveObject, destination, pushTo, author$project$Board$Crate, board.grid) : board.grid),
 				playerPos: destination
 			});
 	});
@@ -6668,8 +6670,12 @@ var ohanhi$keyboard$Keyboard$Arrows$arrows = function (keys) {
 };
 var author$project$Main$processMove = function (model) {
 	var arrows = ohanhi$keyboard$Keyboard$Arrows$arrows(model.pressedKeys);
-	return A2(author$project$Main$canMove, arrows, model) ? _Utils_Tuple2(
-		A2(author$project$Main$move, model, arrows),
+	return A2(author$project$Board$canMove, arrows, model.board) ? _Utils_Tuple2(
+		_Utils_update(
+			model,
+			{
+				board: A2(author$project$Board$move, model.board, arrows)
+			}),
 		elm$core$Platform$Cmd$none) : _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 };
 var author$project$Main$update = F2(
@@ -6996,7 +7002,7 @@ var author$project$Main$view = function (model) {
 			A2(
 				elm$core$Array$map,
 				author$project$Main$viewRow,
-				LesleyLai$elm_grid$Grid$rows(model.board))));
+				LesleyLai$elm_grid$Grid$rows(model.board.grid))));
 };
 var elm$browser$Browser$element = _Browser_element;
 var author$project$Main$main = elm$browser$Browser$element(
