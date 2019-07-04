@@ -1,5 +1,6 @@
-module Util exposing (padList, padToLongest)
+module Util exposing (findInGrid, padList, padToLongest)
 
+import Grid
 import List
 import Maybe
 
@@ -28,3 +29,26 @@ padToLongest x xs =
 
         Nothing ->
             xs
+
+
+findInGrid : (a -> Bool) -> Grid.Grid a -> Maybe ( Int, Int )
+findInGrid f grid =
+    Grid.indexedMap
+        (\x y v ->
+            if f v then
+                Just ( x, y )
+
+            else
+                Nothing
+        )
+        grid
+        |> Grid.foldl
+            (\current new ->
+                case new of
+                    Maybe.Nothing ->
+                        current
+
+                    Maybe.Just ( x, y ) ->
+                        Maybe.Just ( x, y )
+            )
+            Nothing

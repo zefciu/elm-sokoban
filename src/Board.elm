@@ -4,6 +4,7 @@ module Board exposing
     , GameObject(..)
     , canMove
     , canPush
+    , empty
     , getField
     , isCrate
     , isFree
@@ -43,6 +44,12 @@ type alias FieldGrid =
 type alias Board =
     { playerPos : ( Int, Int )
     , grid : Grid.Grid Field
+    }
+
+
+empty =
+    { playerPos = ( 0, 0 )
+    , grid = Grid.repeat 0 0 []
     }
 
 
