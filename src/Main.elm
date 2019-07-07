@@ -112,6 +112,25 @@ init _ =
     )
 
 
+progressLevel : Model -> Model
+progressLevel model =
+    { model
+        | currentLevel = model.currentLevel + 1
+        , board =
+            Array.get (model.currentLevel + 1) model.levels
+                |> Maybe.withDefault Board.empty
+    }
+
+
+checkVictory : ( Model, Cmd msg ) -> ( Model, Cmd msg )
+checkVictory ( model, msg ) =
+    if Board.isWon model.board then
+        ( progressLevel model, msg )
+
+    else
+        ( model, msg )
+
+
 processKey model keyMsg =
     { model | pressedKeys = Keyboard.update keyMsg model.pressedKeys }
 
@@ -135,6 +154,7 @@ update msg model =
         KeyMsg keyMsg ->
             processKey model keyMsg
                 |> processMove
+                |> checkVictory
 
         LevelSetLoaded (Ok data) ->
             let

@@ -5,15 +5,13 @@ module Board exposing
     , canMove
     , canPush
     , empty
-    , getField
-    , isCrate
-    , isFree
-    , isNonBlockingObject
+    , isWon
     , move
     )
 
 import Grid
 import Keyboard.Arrows
+import Util
 
 
 type GameObject
@@ -148,3 +146,13 @@ move board arrows =
                 |> moveObject board.playerPos destination Player
         , playerPos = destination
     }
+
+
+isWon : Board -> Bool
+isWon board =
+    case Util.findInGrid ((==) [ Crate ]) board.grid of
+        Just ( _, _ ) ->
+            False
+
+        Nothing ->
+            True
