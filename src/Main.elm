@@ -148,12 +148,28 @@ processMove model =
         ( model, Cmd.none )
 
 
+processRestart : ( Model, Cmd msg ) -> ( Model, Cmd msg )
+processRestart ( model, msg ) =
+    if model.pressedKeys == [ Keyboard.Character "R" ] then
+        ( { model
+            | board =
+                Array.get model.currentLevel model.levels
+                    |> Maybe.withDefault Board.empty
+          }
+        , msg
+        )
+
+    else
+        ( model, msg )
+
+
 update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
     case msg of
         KeyMsg keyMsg ->
             processKey model keyMsg
                 |> processMove
+                |> processRestart
                 |> checkVictory
 
         LevelSetLoaded (Ok data) ->
