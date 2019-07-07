@@ -5327,7 +5327,7 @@ var author$project$Board$empty = {
 	playerPos: _Utils_Tuple2(0, 0)
 };
 var author$project$Main$Initial = {$: 'Initial'};
-var author$project$Main$newModel = {board: author$project$Board$empty, currentLevel: 0, levels: elm$core$Array$empty, pressedKeys: _List_Nil, state: author$project$Main$Initial};
+var author$project$Main$newModel = {board: author$project$Board$empty, currentLevel: 0, history: _List_Nil, levels: elm$core$Array$empty, pressedKeys: _List_Nil, state: author$project$Main$Initial};
 var elm$core$Result$Ok = function (a) {
 	return {$: 'Ok', a: a};
 };
@@ -11431,28 +11431,76 @@ var author$project$Main$processMove = function (model) {
 		_Utils_update(
 			model,
 			{
-				board: A2(author$project$Board$move, model.board, arrows)
+				board: A2(author$project$Board$move, model.board, arrows),
+				history: A2(elm$core$List$cons, model.board, model.history)
 			}),
 		elm$core$Platform$Cmd$none) : _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+};
+var elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return elm$core$Maybe$Just(x);
+	} else {
+		return elm$core$Maybe$Nothing;
+	}
+};
+var elm$core$List$tail = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return elm$core$Maybe$Just(xs);
+	} else {
+		return elm$core$Maybe$Nothing;
+	}
 };
 var author$project$Main$processRestart = function (_n0) {
 	var model = _n0.a;
 	var msg = _n0.b;
-	return _Utils_eq(
-		model.pressedKeys,
-		_List_fromArray(
-			[
-				ohanhi$keyboard$Keyboard$Character('R')
-			])) ? _Utils_Tuple2(
-		_Utils_update(
-			model,
-			{
-				board: A2(
-					elm$core$Maybe$withDefault,
-					author$project$Board$empty,
-					A2(elm$core$Array$get, model.currentLevel, model.levels))
-			}),
-		msg) : _Utils_Tuple2(model, msg);
+	var _n1 = model.pressedKeys;
+	_n1$2:
+	while (true) {
+		if (_n1.b && (!_n1.b.b)) {
+			switch (_n1.a.$) {
+				case 'Character':
+					if (_n1.a.a === 'R') {
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									board: A2(
+										elm$core$Maybe$withDefault,
+										author$project$Board$empty,
+										A2(elm$core$Array$get, model.currentLevel, model.levels))
+								}),
+							msg);
+					} else {
+						break _n1$2;
+					}
+				case 'Backspace':
+					var _n2 = _n1.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								board: A2(
+									elm$core$Maybe$withDefault,
+									model.board,
+									elm$core$List$head(model.history)),
+								history: A2(
+									elm$core$Maybe$withDefault,
+									_List_Nil,
+									elm$core$List$tail(model.history))
+							}),
+						msg);
+				default:
+					break _n1$2;
+			}
+		} else {
+			break _n1$2;
+		}
+	}
+	return _Utils_Tuple2(model, msg);
 };
 var author$project$Main$update = F2(
 	function (msg, model) {

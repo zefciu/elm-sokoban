@@ -27,6 +27,7 @@ type alias Model =
     { pressedKeys : List Keyboard.Key
     , state : ModelState
     , board : Board.Board
+    , history : List Board.Board
     , levels : Array.Array Board.Board
     , currentLevel : Int
     }
@@ -38,6 +39,7 @@ newModel =
     , state = Initial
     , levels = Array.empty
     , currentLevel = 0
+    , history = []
     , board = Board.empty
     }
 
@@ -142,7 +144,12 @@ processMove model =
             Keyboard.Arrows.arrows model.pressedKeys
     in
     if Board.canMove arrows model.board then
-        ( { model | board = Board.move model.board arrows }, Cmd.none )
+        ( { model
+            | board = Board.move model.board arrows
+            , history = model.board :: model.history
+          }
+        , Cmd.none
+        )
 
     else
         ( model, Cmd.none )
@@ -150,17 +157,30 @@ processMove model =
 
 processRestart : ( Model, Cmd msg ) -> ( Model, Cmd msg )
 processRestart ( model, msg ) =
-    if model.pressedKeys == [ Keyboard.Character "R" ] then
-        ( { model
-            | board =
-                Array.get model.currentLevel model.levels
-                    |> Maybe.withDefault Board.empty
-          }
-        , msg
-        )
+    case model.pressedKeys of
+        [ Keyboard.Character "R" ] ->
+            ( { model
+                | board =
+                    Array.get model.currentLevel model.levels
+                        |> Maybe.withDefault Board.empty
+              }
+            , msg
+            )
 
-    else
-        ( model, msg )
+        [ Keyboard.Backspace ] ->
+            ( { model
+                | board =
+                    List.head model.history
+                        |> Maybe.withDefault model.board
+                , history =
+                    List.tail model.history
+                        |> Maybe.withDefault []
+              }
+            , msg
+            )
+
+        _ ->
+            ( model, msg )
 
 
 update : Msg -> Model -> ( Model, Cmd msg )
